@@ -1,0 +1,54 @@
+% Input: robot -> A 2-DOF robot encapsulated in a MATLAB cell with fields:
+%                 robot.link1, robot.link2, robot.pivot1, robot.pivot2
+%                 See description in hw2_cspace and demo code in C1.
+%        obstacles -> 1xN vector of polyshape objects describing N 2-D
+%                     polygonal obstacles
+%        q_path -> Mx2 matrix containing a collision-free path from
+%                  q_start to q_goal. Each row in q_path is a robot
+%                  configuration. The first row should be q_start,
+%                  the final row should be q_goal.
+% Output: num_collisions -> Number of swept-volume collisions encountered
+%                           between consecutive configurations in q_path
+
+function num_collisions = C6(robot, obstacles, q_path)
+    poly2_all_config = [];
+    num_collisions = 0;
+    [poly1, poly2, ~, ~] = q2poly(robot,[0.85;0.9]);
+    polyinit = poly1;
+    for i=2:size(q_path,1)
+        config_x = q_path(i,1);
+        config_y = q_path(i,2);
+        last_config_x = q_path(i-1,1);
+        last_config_y = q_path(i-1,2);
+        config = [config_x, config_y];
+        last_config = [last_config_x, last_config_y];
+        [~, last_poly2, ~, ~] = q2poly(robot,last_config);
+        [~, poly2, ~, ~] = q2poly(robot,config);
+        [last_x, last_y] = boundary(last_poly2);
+        [x, y] = boundary(poly2);
+        x = x(1:end-1,:);
+        y = y(1:end-1,:);
+        x = x(1:end-1,:);
+        y = y(1:end-1,:);
+        disp("lalal");
+        disp(x);
+        disp(y);
+        polyinit = union(polyinit,poly2);
+%         poly2_all_config(end+1, :)
+        
+    end
+%     c = poly2;
+%     disp(size(poly2_all_config,1));
+%     disp(size(poly2_all_config,2));
+%     disp(poly2_all_config);
+%     plot(polyin)
+    polyout = convhull(polyinit);
+    plot(polyout);   
+    for n = 1 : length(obstacles)
+        if intersect(poly2_all_config,obstacles(n)).NumRegions >= 1
+            num_collisions = num_collisions + 1;
+        end
+        
+    end
+    
+end
